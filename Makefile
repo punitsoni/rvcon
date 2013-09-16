@@ -1,6 +1,6 @@
 CC := gcc
 
-SRC_FILES := rvcon.c ui.c
+SRC_FILES := rvcon.c ui.c controller.c
 CC_LIBS := -lpthread -lpigpio -lrt -lncurses
 CC_FLAGS := -g
 OUT_FILE := rvcon

@@ -3,61 +3,75 @@
 #include <curses.h>
 #include <signal.h>
 #include "ui.h"
+#include "rvcon-log.h"
 
-static void finish(int sig);
-static void (*ui_exit_cb)();
+static void ui_cleanup();
+static void ui_handle_signal(int sig);
+static ui_config_t *ui_config;
 
 int ui_init(ui_config_t *config)
 {
+    ui_config = config;
     /* Curses Initialization */
-    int num;
-
-    ui_exit_cb = config->exit_cb;
-
-    signal(SIGINT, finish);     /* arrange interrupts to terminate */
+    signal(SIGINT, ui_handle_signal);     /* arrange interrupts to terminate */
     initscr();                  /* initialize the curses library */
     keypad(stdscr, TRUE);       /* enable keyboard mapping */
     nonl();      /* tell curses not to do NL->CR/NL on output */
     cbreak();    /* take input chars one at a time, no wait for \n */
-    noecho();      /* echo input - in color */
+    noecho();
+    return 0;
+}
 
-#if 0
-    if (has_colors())
-    {
-        start_color();
+int ui_send_event(ui_event_type_t type)
+{
+    ui_event_t event;
+    event.type = type;
+    if(ui_config->event_cb)
+         return (ui_config->event_cb(&event));
+    return 0;
+}
 
-        init_pair(1, COLOR_RED,     COLOR_BLACK);
-        init_pair(2, COLOR_GREEN,   COLOR_BLACK);
-        init_pair(3, COLOR_YELLOW,  COLOR_BLACK);
-        init_pair(4, COLOR_BLUE,    COLOR_BLACK);
-        init_pair(5, COLOR_CYAN,    COLOR_BLACK);
-        init_pair(6, COLOR_MAGENTA, COLOR_BLACK);
-        init_pair(7, COLOR_WHITE,   COLOR_BLACK);
-    }
-#endif
-
+/* UI Loop */
+void ui_start()
+{
+    int c;
     while(1)
     {
-        int c = getch();     /* refresh, accept single keystroke of input */
-        //attrset(COLOR_PAIR(num % 8));
-        num++;
-        /* process the command keystroke */
-        mvprintw(5, 10, "char=%c, key_code = %03d", c, c);
+        c = getch();     /* refresh, accept single keystroke of input */
+        mvprintw(0, 0, "c=%03d", c, c);
         refresh();
         switch (c) {
         case 'q':
-            finish(0);
+            ui_cleanup();
+            break;
+        case KEY_UP:
+           ui_send_event(UI_EVENT_FWD); 
+           break;
+        case KEY_DOWN:
+           ui_send_event(UI_EVENT_BACK); 
+           break;
+        case KEY_LEFT:
+           ui_send_event(UI_EVENT_LEFT); 
+           break;
+        case KEY_RIGHT:
+           ui_send_event(UI_EVENT_RIGHT); 
+           break;
+
         }
     }
-    finish(0);
 }
 
-static void finish(int sig)
+/* Clen-up function */
+static void ui_cleanup()
 {
     endwin();
-    if(ui_exit_cb) {
-        ui_exit_cb();
+    if(ui_config->exit_cb) {
+        ui_config->exit_cb();
     }
-    exit(0);
+}
+
+static void ui_handle_signal(int sig)
+{
+    ui_cleanup();
 }
 
