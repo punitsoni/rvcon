@@ -59,9 +59,11 @@ int ui_event_cb(ui_event_t *event)
         ctrl_process_cmd(&cmd);
         break;
     case UI_EVENT_LEFT:
+        break;
     case UI_EVENT_RIGHT:
+        break;
     default:
-        P_ERR("invalid event type: %d", event->type);
+        P_ERR("invalid event type: %d\n", event->type);
         return -1;
     }
     return 0;
