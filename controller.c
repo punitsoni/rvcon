@@ -12,7 +12,7 @@
 int ctrl_init()
 {
     int i;
-    if(gpioInitialize() < 0)
+    if(gpioInitialise() < 0)
         return -1;
     for(i=0; i<RV_MOTOR_CHANNELS; i++) {
         gpioSetMode(rv_config.pwm_gpio[i], PI_OUTPUT);
@@ -31,12 +31,13 @@ int ctrl_cleanup()
     return 0;
 }
 
-static ctrl_move_all(int dir, float speed)
+static int ctrl_move_all(int dir, float speed)
 {
     int i;
     for(i=0; i<RV_MOTOR_CHANNELS; i++) {
         ;
     }
+    return 0;
 }
 
 int ctrl_process_cmd(ctrl_cmd_t *cmd)

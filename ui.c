@@ -74,4 +74,3 @@ static void ui_handle_signal(int sig)
 {
     ui_cleanup();
 }
-
