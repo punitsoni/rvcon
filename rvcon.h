@@ -12,7 +12,7 @@ typedef struct _rv_config_t {
    int pwm_gpio[RV_MOTOR_CHANNELS];
    int dir_gpio[RV_MOTOR_CHANNELS];
    int enc_gpio[RV_MOTOR_CHANNELS];
-   int cur_ana_in[RV_MOTOR_CHANNELS];
+   int cur_ana_in[RV_MOTOR_CHANNELS]; 
 } rv_config_t;
 
 extern const rv_config_t rv_config;

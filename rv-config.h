@@ -10,7 +10,8 @@ const rv_config_t rv_config = {
     },
     /* dir_gpio */
     {
-        24,
+        17,
+        //24,
         25,
         7,
         8,

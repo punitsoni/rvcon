@@ -38,12 +38,31 @@ int ctrl_cleanup()
     return 0;
 }
 
+static int ctrl_set_motor_state(int id, int dir, int speed)
+{
+    /* speed control not supported for now */
+    gpioWrite(rv_config.dir_gpio[id],dir);
+    if(speed == 0)
+        gpioWrite(rv_config.pwm_gpio[id], GPIO_LOW);
+    else
+        gpioWrite(rv_config.pwm_gpio[id], GPIO_HIGH);
+    return 0;
+}
+
 static int ctrl_move_all(int dir, float speed)
 {
     int i;
     for(i=0; i<RV_MOTOR_CHANNELS; i++) {
-        gpioWrite(rv_config.pwm_gpio[i], GPIO_HIGH);
-        gpioWrite(rv_config.dir_gpio[i], GPIO_HIGH);
+        ctrl_set_motor_state(i, dir, 1);
+    }
+    return 0;
+}
+
+static int ctrl_stop_all()
+{
+    int i;
+    for(i=0; i<RV_MOTOR_CHANNELS; i++) {
+        ctrl_set_motor_state(i, 0, 0);
     }
     return 0;
 }
@@ -51,7 +70,7 @@ static int ctrl_move_all(int dir, float speed)
 int ctrl_process_cmd(ctrl_cmd_t *cmd)
 {
     if(!cmd) {
-        P_ERR("");
+        P_ERR("failed");
         return -1;
     }
     switch(cmd->type) {
@@ -59,8 +78,10 @@ int ctrl_process_cmd(ctrl_cmd_t *cmd)
        ctrl_move_all(MOTOR_DIR_FWD, 100.0f);
        break;
     case CTRL_MOVE_BACK:
+       ctrl_move_all(MOTOR_DIR_BACK, 100.0f);
         break;
     case CTRL_STOP:
+        ctrl_stop_all();
         break;
     default:
         P_ERR("invalid cmd type: %d", cmd->type);
