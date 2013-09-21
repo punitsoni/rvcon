@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "rvcon.h"
 #include "rvcon-log.h"
-#include "rv-config.h"
+#include "rv-hw-config.h"
 #include "ui.h"
 #include "controller.h"
 
@@ -20,6 +20,9 @@ typedef struct _rvcon_cmd_config_t {
     int curses_ui;
 } rvcon_cmd_config_t;
 static rvcon_cmd_config_t cmd_config;
+
+/* rover controller */
+ctrl_t rctrl;
 
 static int parse_cmdline(int argc, char* argv[])
 {
@@ -47,16 +50,15 @@ void ui_exit_cb()
 
 int ui_event_cb(ui_event_t *event)
 {
-    ctrl_cmd_t cmd;
     P_INFO("ui event received : %d\n", event->type);
     switch(event->type) {
     case UI_EVENT_FWD:
-        cmd.type = CTRL_MOVE_FWD;
-        ctrl_process_cmd(&cmd);
+        ctrl_set_dir(rctrl, DIR_FWD);
+        ctrl_set_speed(rctrl, 100);
         break;
     case UI_EVENT_BACK:
-        cmd.type = CTRL_MOVE_BACK;
-        ctrl_process_cmd(&cmd);
+        ctrl_set_dir(rctrl, DIR_BACK);
+        ctrl_set_speed(rctrl, 100);
         break;
     case UI_EVENT_LEFT:
         break;
@@ -82,8 +84,7 @@ int main(int argc, char *argv[])
             return -1;
         }
         logfile = fp;
-        /* init controller */
-        ctrl_init();
+        ctrl_create(rctrl, &rv_hw_config);
         /* init ui */
         ui_config_t ui_config;
         ui_config.exit_cb = ui_exit_cb;

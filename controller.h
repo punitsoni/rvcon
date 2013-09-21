@@ -1,23 +1,30 @@
 #ifndef __CONTROLLER_H__
 #define __CONTROLLER_H__
 
-typedef struct _ctrl_config_t {
-    int x; //todo
-} ctrl_config_t;
+#include <stdint.h>
 
-typedef enum _ctrl_cmd_type_t {
-    CTRL_MOVE_FWD,
-    CTRL_MOVE_BACK,
-    CTRL_STOP,
-} ctrl_cmd_type_t;
+#define RV_MOTOR_CHANNELS   4
 
-typedef struct _ctrl_cmd_t {
-    ctrl_cmd_type_t type;
-    void *arg;
-} ctrl_cmd_t;
+/* Rover Hardware Config */
+typedef struct _rv_hw_config_t {
+   int pwm_gpio[RV_MOTOR_CHANNELS];
+   int dir_gpio[RV_MOTOR_CHANNELS];
+   int enc_gpio[RV_MOTOR_CHANNELS];
+   int cur_ana_in[RV_MOTOR_CHANNELS];
+} rv_hw_config_t;
 
-int ctrl_init();
-int ctrl_cleanup();
-int ctrl_process_cmd(ctrl_cmd_t *cmd);
+/* Opaque handle for controller object */
+typedef struct _controller* ctrl_t;
+
+typedef enum _ctrl_dir_t {
+    DIR_FWD,
+    DIR_BACK,
+} ctrl_dir_t;
+
+/* Public API */
+int32_t ctrl_create(ctrl_t ctrl, const rv_hw_config_t *hw_config);
+int32_t ctrl_destroy(ctrl_t ctrl);
+int32_t ctrl_set_speed(ctrl_t ctrl, uint8_t  speed);
+int32_t ctrl_set_dir(ctrl_t ctrl, ctrl_dir_t dir);
 
 #endif
